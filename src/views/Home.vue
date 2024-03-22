@@ -2,6 +2,7 @@
   <div class="home">
     <Formulate ref="formRef" :items="items" label-placement="left" :grid="{ cols: 24, xGap: 20 }" />
     <n-button @click="getFormData">获取表单数据</n-button>
+    <n-button @click="validate">验证表单</n-button>
   </div>
 </template>
 
@@ -64,6 +65,14 @@ const formRef = ref(null)
 
 function getFormData() {
   console.log(formRef.value.formData)
+}
+
+function validate() {
+  formRef.value.validate((errors) => {
+    if (errors) {
+      console.error(errors)
+    }
+  })
 }
 </script>
 

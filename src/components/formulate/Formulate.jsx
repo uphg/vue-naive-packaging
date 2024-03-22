@@ -21,7 +21,7 @@ const optionItemsMap = {
   'checkbox-group': NCheckbox,
 }
 
-const props = {
+const formulateProps = {
   items: Array,
   grid: Object,
 
@@ -65,15 +65,19 @@ const props = {
 }
 
 const Formulate = defineComponent({
-  props: props,
+  props: formulateProps,
   setup(props, context) {
     const formData = useFormData(props.items)
+    const [formRef, formExpose] = useFormExpose()
     const formItems = computed(handleFormItems)
+
     context.expose({
+      ...formExpose,
       get formData() {
         return formData.value
       }
     })
+
     function handleFormItems() {
       const result = []
       const stack = [[props.items, result]]
@@ -121,7 +125,7 @@ const Formulate = defineComponent({
     function render() {
       const Items = formItems.value?.map(renderItem)
       return (
-        <NForm model={formData.value} {...pick(props, formPropNames)}>
+        <NForm ref={formRef} model={formData.value} {...pick(props, formPropNames)}>
           {props.grid ? (
             <NGrid {...props.grid}>
               {Items}
@@ -148,6 +152,18 @@ function useFormData(items) {
     }
   }
   return formData
+}
+
+function useFormExpose() {
+  const formRef = ref(null)
+  return [formRef, {
+    validate(validateCallback, shouldRuleBeApplied) {
+      return formRef.value.validate(validateCallback, shouldRuleBeApplied)
+    },
+    restoreValidation() {
+      return formRef.value.restoreValidation()
+    }
+  }]
 }
 
 export default Formulate
