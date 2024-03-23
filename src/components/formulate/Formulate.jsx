@@ -1,24 +1,41 @@
 import { defineComponent, h, ref, computed } from 'vue'
-import { NForm, NGrid, NFormItem, NFormItemGi, NInput, NSelect, NInputNumber, NRadioGroup, NCheckboxGroup, NDatePicker, NRadio, NCheckbox } from 'naive-ui'
+import {
+  NForm,
+  NGrid,
+  NFormItem,
+  NFormItemGi,
+  NInput,
+  NSelect,
+  NInputNumber,
+  NRadioGroup,
+  NCheckboxGroup,
+  NDatePicker,
+  NRadio,
+  NCheckbox
+} from 'naive-ui'
 import { pick, omit, isNil } from 'lodash-es'
 
-const formPropNames = ['disabled', 'inline', 'rules', 'size', 'labelWidth', 'labelAlign', 'labelPlacement', 'showFeedback', 'showLabel', 'validateMessages', 'showRequireMark', 'requireMarkPlacement']
+const formPropNames = [
+  'disabled',
+  'inline',
+  'rules',
+  'size',
+  'labelWidth',
+  'labelAlign',
+  'labelPlacement',
+  'showFeedback',
+  'showLabel',
+  'validateMessages',
+  'showRequireMark',
+  'requireMarkPlacement'
+]
 // const formItemPropNames = ['feedback', 'first', 'ignorePathChange', 'label', 'labelAlign', 'labelPlacement', 'labelStyle', 'labelProps', 'labelWidth', 'path', 'rule', 'rulePath', 'showFeedback', 'showLabel', 'showRequireMark', 'requireMarkPlacement', 'size', 'validationStatus']
 // const gridPropNames = ['layoutShiftDisabled', 'responsive', 'cols', 'itemResponsive', 'collapsed', 'collapsedRows', 'itemStyle', 'xGap', 'yGap']
 const childPropNames = ['is', 'field', 'children', 'defaultValue']
 
-const formulateMap = {
-  input: NInput,
-  select: NSelect,
-  'input-number': NInputNumber,
-  'radio-group': NRadioGroup,
-  'checkbox-group': NCheckboxGroup,
-  'date-picker': NDatePicker
-}
-
 const optionItemsMap = {
   'radio-group': NRadio,
-  'checkbox-group': NCheckbox,
+  'checkbox-group': NCheckbox
 }
 
 const formulateProps = {
@@ -37,7 +54,7 @@ const formulateProps = {
   },
   model: {
     type: Object,
-    default: () => { }
+    default: () => {}
   },
   rules: Object,
   disabled: Boolean,
@@ -92,14 +109,19 @@ const Formulate = defineComponent({
           const isOptionsNode = item.is === 'radio-group' || item.is === 'checkbox-group'
           const node = {
             is: item.is
-              ? formulateMap?.[item.is]
-              : (level === 0 && props.grid ? NFormItemGi : NFormItem),
+              ? getInput(item.is)
+              : level === 0 && props.grid
+                ? NFormItemGi
+                : NFormItem,
             field: item.field,
             props: omit(item, isOptionsNode ? childPropNames.concat(['options']) : childPropNames)
           }
 
           if (isOptionsNode) {
-            node.children = item.options.map(child => ({ is: optionItemsMap[item.is] ?? item.is, props: child }))
+            node.children = item.options.map((child) => ({
+              is: optionItemsMap[item.is] ?? item.is,
+              props: child
+            }))
           } else if (item.children) {
             node.children = []
             stack.push([item.children, node.children])
@@ -112,13 +134,15 @@ const Formulate = defineComponent({
     }
 
     function renderItem(node) {
-      return node && h(node.is, { ...node.props, ...withUpdateValue(node) }, () => node.children?.map(renderItem))
+      return (
+        node && h(node.is, { ...node.props, ...withUpdateValue(node) }, () => node.children?.map(renderItem))
+      )
     }
 
     function withUpdateValue(node) {
       return node.field ? {
         value: formData.value[node.field],
-        onUpdateValue: (value) => formData.value[node.field] = value
+        onUpdateValue: (value) => (formData.value[node.field] = value)
       } : {}
     }
 
@@ -126,11 +150,7 @@ const Formulate = defineComponent({
       const Items = formItems.value?.map(renderItem)
       return (
         <NForm ref={formRef} model={formData.value} {...pick(props, formPropNames)}>
-          {props.grid ? (
-            <NGrid {...props.grid}>
-              {Items}
-            </NGrid>
-          ) : Items}
+          {props.grid ? <NGrid {...props.grid}>{Items}</NGrid> : Items}
         </NForm>
       )
     }
@@ -156,14 +176,41 @@ function useFormData(items) {
 
 function useFormExpose() {
   const formRef = ref(null)
-  return [formRef, {
-    validate(validateCallback, shouldRuleBeApplied) {
-      return formRef.value.validate(validateCallback, shouldRuleBeApplied)
-    },
-    restoreValidation() {
-      return formRef.value.restoreValidation()
+  return [
+    formRef,
+    {
+      validate(validateCallback, shouldRuleBeApplied) {
+        return formRef.value.validate(validateCallback, shouldRuleBeApplied)
+      },
+      restoreValidation() {
+        return formRef.value.restoreValidation()
+      }
     }
-  }]
+  ]
+}
+
+function getInput(type) {
+  switch (type) {
+    case 'input':
+    case 'Input':
+      return NInput
+    case 'select':
+    case 'Select':
+      return NSelect
+    case 'input-number':
+    case 'InputNumber':
+      return NInputNumber
+    case 'radio-group':
+    case 'RadioGroup':
+      return NRadioGroup
+    case 'checkbox-group':
+    case 'CheckboxGroup':
+      return NCheckboxGroup
+    case 'date-picker':
+    case 'DatePicker':
+      return NDatePicker
+  }
+  return null
 }
 
 export default Formulate

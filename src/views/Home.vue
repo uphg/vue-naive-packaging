@@ -21,7 +21,7 @@ const items = [
   {
     label: '性别', path: 'sex', span: 12,
     children: [{
-      is: 'select', field: 'sex', defaultValue: 1, placeholder: '选择性别',
+      is: 'radio-group', field: 'sex', defaultValue: 1, placeholder: '选择性别',
       options: [{ label: '男', value: 0 }, { label: '女', value: 1 }]
     }]
   },
@@ -30,7 +30,7 @@ const items = [
     children: [
       { is: 'input-number', field: 'age', defaultValue: 1, class: 'mr-2', placeholder: '输入年龄' },
       {
-        is: 'checkbox-group', field: 'ageGroup', defaultValue: 1, placeholder: '选择年龄段',
+        is: 'radio-group', field: 'ageGroup', defaultValue: 1, placeholder: '选择年龄段',
         options: [
           { label: '10~18', value: 0 },
           { label: '19~20', value: 1 },
